@@ -17,33 +17,88 @@ module.exports = (robot)=> {
       flag = false;
       feedback = {};
       let text = message.text;
-      console.log("message.text:\n" + text);
-      console.log("text type:" + typeof (text));
-      console.log("meessage info:\n" + JSON.stringify(message));
-      console.log("room: "+message.room);
-
-      let description, status, contact_name, mailboxID, device, version, os_version, occur_ime;
+      let description="", status="", contact_name="",
+        mailboxID="", device="", version="", os_version="", occur_time="";
       //var re_subject = new RegExp("^Subject: RingCentral (\d+(\.\d+)*) (Android|iOS) Feedback (\+\d+ \(\d+\) \d+)\s*,\s*(.+) (.+)$");
-      //var re_from = new RegExp("");
-      //var re_date = new RegExp("");
 
       if (typeof(text) == "string" && text.indexOf("RC Mobile Feedback") > -1 && message.room=='46352326658') {
+        //console.log("message text:\n" + text);
+        //console.log("text type:" + typeof (text));
         match = true;
-        var section = new Array();
-        section = text.split('\n\n');
-        for (i = 0, len = section.length; i < len; i++) {
-          console.log("String_" + i + ": " + section[i]);
+
+        console.log("meessage info:\n" + JSON.stringify(message));
+        console.log("room: "+message.room);
+
+        var items=text.split("\n");
+
+
+        for(var i=items.length;i>=0;i--){
+          console.log("item_"+i+": "+items[i]);
+          if(items[i]==""){
+            items.splice(i,1);
+          }
         }
 
+        for(var i=0;i<items.length;i++){
+          console.log("new_"+i+":"+items[i]);
+        }
+
+        var from=items[0];
+        console.log("from= " +from);
+        contact_name=from.split("<")[0].split('From:')[1]+"<"+from.split('<')[1]+">";
+        console.log("contact name:"+ contact_name);
+        var data=items[1];
+        occur_time=data.split("Date: ")[1];
+        console.log("occur time:"+occur_time);
+        var subject=items[3];
+        console.log("subject:"+subject);
+
+
+        var info=subject.match(new RegExp("^Subject: RingCentral (\\d+(\\.\\d+)*) (Android?) Feedback (\\+\\d+ \\(\\d+\\) \\d+)\\s*,\\s*(.+) (.+)$"));
+
+        for(var i=0;i<info.length;i++){
+          console.log(i+": "+info[i]);
+        }
+
+        version=info[1];
+        device=info[5];
+        os_version=info[6];
+        console.log("Version: "+version);
+
+        for(var i=items.length;i>3;i--){
+          var re=new RegExp("^RingCentral");
+          if(re.test(items[i])){
+            for(var j=4;j<i;j++){
+              var er=new RegExp("^Please describe your problem here");
+              if(er.test(items[i+1])){
+                description+=items[i+1]+"/n";
+              }else{
+                description+=items[i]+"/n";
+              }
+            }
+
+            console.log("this msg: "+items[i]);
+            var temp=items[i].split(', ');
+            console.log("temp length:"+temp.length);
+            mailboxID=temp[temp.length-1];
+            break;
+          }
+        }
+
+        console.log("description: "+description);
+        console.log("mailboxID: "+mailboxID);
+
+
+
         feedback = {
-          description: "test",
-          contactName: "contactName",
+          description: description,
+          contactName: contact_name,
           status: "new",
-          device: "device",
-          version: "version",
-          osVersion: "osVersion",
-          occurTime: "occurTime",
-          mailboxID: "mailboxID"
+          device: device,
+          version: version,
+          osVersion: os_version,
+          occurTime: occur_time,
+          mailboxID: mailboxID
         }
 
         console.log(JSON.stringify(feedback));
@@ -51,8 +106,6 @@ module.exports = (robot)=> {
       return match;
     },
     (response)=> {
-      console.log("is_recorded: " + is_recorded);
-      console.log("is_synced: " + is_synced);
       var spreadsheetId = "1cY7G405Ag7l4VmftIhR1hpmo7pveCHn8bPevr9P4IYA";
       var url = "http://devbox.example.com:3000/upsert/" + spreadsheetId + "/autosync";
       retrieveData(robot, url).then(function (result) {
