@@ -73,8 +73,8 @@ module.exports = (robot)=> {
             console.log(i + ": " + info[i]);
           }
           version = info[1];
-          device = info[5];
-          os_version = info[6];
+          device = info[4];
+          os_version = info[5];
           console.log("Version: " + version);
         }
 
