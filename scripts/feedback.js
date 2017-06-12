@@ -7,6 +7,7 @@ var match;
 var is_recorded;
 var is_synced;
 var feedback;
+var msg_text;
 
 module.exports = (robot)=> {
 
@@ -16,7 +17,7 @@ module.exports = (robot)=> {
       match = false;
       is_synced = false;
       feedback = {};
-      let msg_text = message.text;
+      msg_text = message.text;
       var description = "", status = "", contact_name = "",
         mailboxID = "", device = "", version = "", os_version = "", occur_time = "";
       //var re_subject = new RegExp("^Subject: RingCentral (\d+(\.\d+)*) (Android|iOS) Feedback (\+\d+ \(\d+\) \d+)\s*,\s*(.+) (.+)$");
@@ -58,14 +59,14 @@ module.exports = (robot)=> {
           var info
           if (new RegExp("Android Feedback").test(subject)) {
             console.log(">>>>?1");
-            info = subject.match(new RegExp("^Subject: (RingCentral|Office@Hand) (\\d+(\\.\\d+)*) (Android?) Feedback (\\+\\d+ \\(\\d+\\) \\d+)\\s*,\\s*(.+)/(.+)$"));
+            info = subject.match(new RegExp("^Subject: (RingCentral|Office@Hand) (\\d+(\\.\\d+)*) (Android?) Feedback (\\+\\d+ \\(\\d+\\) (.+))\\s*,\\s*(.+)/(.+)$"));
             for (var i = 0; i < info.length; i++) {
               console.log(i + ": " + info[i]);
             }
 
-            version = info[1];
-            device = info[5];
-            os_version = info[6];
+            version = info[2];
+            device = info[7];
+            os_version = info[8];
             console.log("Version: " + version);
           } else {
             console.log(">>>>?2");
@@ -124,7 +125,7 @@ module.exports = (robot)=> {
           console.log(JSON.stringify(feedback));
         }catch(e){
           match = false;
-          var url = "http://devbox.example.com:3000/upsert/unknown";
+          var url = "http://localhost:3000/upsert/unknown";
           var wrong_data={
               rawData:msg_text
           }
