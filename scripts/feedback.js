@@ -70,13 +70,13 @@ module.exports = (robot)=> {
             console.log("Version: " + version);
           } else {
             console.log(">>>>?2");
-            info = subject.match(new RegExp("^Subject: RingCentral (\\d+(\\.\\d+)*) Feedback (\\+\\d+ \\(\\d+\\) \\d+ \\* \\d+)\\s*,\\s*(.+)/(.+)$"));
+            info = subject.match(new RegExp("^^Subject: RingCentral (\\d+(\\.\\d+)*) Feedback (\\+\\d+ \\(\\d+\\) (.+))\\s*,\\s*(.+)/(.+)$"));
             for (var i = 0; i < info.length; i++) {
               console.log(i + ": " + info[i]);
             }
             version = info[1];
-            device = info[4];
-            os_version = info[5];
+            device = info[5];
+            os_version = info[6];
             console.log("Version: " + version);
           }
 
